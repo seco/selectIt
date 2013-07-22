@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script type="text/javascript" src="jquery-1.7.2.js"></script>
+	<script type="text/javascript" src="searchit.js"></script>
+	<link rel="stylesheet" type="text/css" href="searchit.css">
+</head>
+<body>
+
+<p><b>SearchIt plugin demo, with 9000 items in the list.</b></p>
+
+<p>Search : </p>
+
+<input class="searchIt">
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+
+	$.ajax({
+		url : 'http://www.json-generator.com/j/fPvj?indent=4'
+	}).done(function(data){
+
+		$('.searchIt').searchIt({ 
+			list : data.result, 
+			item_number : 15, 
+			previous_label : 'Previous page', 
+			next_label : 'Next page',
+			select_value : 'grad',
+			select_label : 'name'
+		});
+
+	});
+
+});
+
+</script>
+</body>
+</html>
