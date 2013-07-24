@@ -2,16 +2,16 @@
 <html>
 <head>
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-	<script type="text/javascript" src="searchit.js"></script>
-	<link rel="stylesheet" type="text/css" href="searchit.css">
+	<script type="text/javascript" src="selectit.js"></script>
+	<link rel="stylesheet" type="text/css" href="selectit.css">
 </head>
 <body>
 
-<p><b>SearchIt plugin demo, with 9000 items in the list.</b></p>
+<p><b>SelectIt plugin demo, with 9000 items in the list.</b></p>
 
 <p>Search : </p>
 
-<input class="searchIt">
+<select class="selectIt"></select>
 
 <script type="text/javascript">
 
@@ -21,13 +21,14 @@ $(document).ready(function(){
 		url : 'http://www.json-generator.com/j/fPvj?indent=4'
 	}).done(function(data){
 
-		$('.searchIt').searchIt({ 
+		$('.selectIt').selectIt({ 
 			list : data.result, 
 			item_number : 15, 
 			previous_label : 'Previous page', 
 			next_label : 'Next page',
 			select_value : 'grad',
-			select_label : 'name'
+			select_label : 'name',
+			full_paging : false
 		});
 
 	});
