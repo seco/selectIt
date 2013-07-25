@@ -1,352 +1,358 @@
-(function(){
+(function($){
 
-	$.fn.selectIt = function(opt_ext){
+	var SelectIt = function(html_element, options_external){
 
-		return this.each(function(){
+		var defaults = {
+			list : [],
+			item_number : 15,
+			previous_label : 'Prev',
+			next_label : 'Next',
+			select_label : '',
+			select_value : '',
+			full_paging : false
+		};
 
-			var self = this;
+		//merged user options with default
+		this.options = $.extend(defaults, options_external);
 
-			//default options
-			var defaults = {
-				list : [],
-				item_number : 15,
-				previous_label : 'Prev',
-				next_label : 'Next',
-				select_label : '',
-				select_value : '',
-				full_paging : false
-			};
+		//required selectIt option value - select value
+		if(this.options.select_value==''){
+			console.log('Required field select_value not set!')
+			return $(html_element);
+		}
 
-			//merged user options with default
-			var options = $.extend(defaults, opt_ext);
+		//required selectIt option value - label value
+		if(this.options.select_label==''){
+			console.log('Required field select_label not set!')
+			return $(html_element);
+		}
 
-			//required selectIt option value - select value
-			if(options.select_value==''){
-				alert('Required field select_value not set!')
-				return;
+
+		//list of items to be searched
+		this.init_list = this.options.list;
+		//number of page rows in select
+		this.item_number = this.options.item_number;
+		//filtered list by search term
+		this.filtered_list = this.init_list;
+		//total number of pages of the filtered list
+		this.page_number = Math.floor(this.filtered_list.length/this.item_number) + 1
+		//current displayed page
+		this.current_page = 1;
+		//form input search value
+		this.search_value = '';
+		//list to be displayed (one page)
+		this.displayed_list = [];
+		//list selected value
+		this.chosen_value = {};
+
+		//initial html setup
+		this.set_up_html(html_element);
+		//initial load of the first page
+		this.change_page(1, true);	
+
+	}
+
+
+	SelectIt.prototype.get_html_element_style = function(dom){
+
+        var style;
+        var returns = {};
+        // FireFox and Chrome 
+        if(window.getComputedStyle){
+            style = window.getComputedStyle(dom, null);
+            for(var i = 0, l = style.length; i < l; i++){
+                var prop = style[i];
+                var val = style.getPropertyValue(prop);
+                returns[prop] = val;
+            }
+            return returns;
+        }
+        // IE and Opera
+        if(dom.currentStyle){
+            style = dom.currentStyle;
+            for(var prop in style){
+                returns[prop] = style[prop];
+            }
+            return returns;
+        }
+        // Style from style attribute
+        if(style = dom.style){
+            for(var prop in style){
+                if(typeof style[prop] != 'function'){
+                    returns[prop] = style[prop];
+                }
+            }
+            return returns;
+        }
+        return returns;
+
+	}
+
+
+	SelectIt.prototype.spawnNavigationNumber = function(id){
+
+		var nav = '';
+		if(id==this.current_page){
+			nav += '<span class="selectIt_pagination_item active">' + id + '</span>';
+		}else{
+			nav += '<span class="selectIt_pagination_item inactive">' + id + '</span>';
+		}
+
+		return nav;
+
+	};
+
+
+	//navigation factory - ALPHA
+	SelectIt.prototype.navigationFactory = function(){
+
+		var pagination_navigation = ""
+
+		if(this.page_number<4){
+
+			for(var i = 1; i <= 3; i++){
+				pagination_navigation += spawnNavigationNumber(i)
+			}
+			
+		}else{
+
+			var start = this.current_page - 2;
+
+			if(this.current_page==1){
+				start = this.current_page;
 			}
 
-			//required selectIt option value - label value
-			if(options.select_label==''){
-				alert('Required field select_label not set!')
-				return;
-			}			
+			var end = Number(this.current_page) + 2;
+
+			for(var i = start; i <= end; i++){
+				pagination_navigation += spawnNavigationNumber(i)
+			}
+			
+			pagination_navigation += '<span style="float:left; cursor:default;">...</span>';
+			pagination_navigation += spawnNavigationNumber(this.page_number)
+
+		}
+
+		return pagination_navigation;
+
+	};
+
+	//switch to the next result set page
+	SelectIt.prototype.nextPage = function(){
+
+		if(this.current_page < this.page_number){
+			this.current_page++;
+			this.change_page(this.current_page);
+		}
+
+	};
+
+	//switch to the previous result set page
+	SelectIt.prototype.prevPage = function(){
+
+		if(this.current_page > 1){
+			this.current_page--;
+			this.change_page(this.current_page);
+		}
+
+	};
 
 
-/***************************************************************** VARIABLES *******************************************************************/
+	SelectIt.prototype.setPage = function(num){
+		this.current_page = num;
+		this.change_page(this.current_page);
+	};
 
 
-			//list of items to be searched
-			self.init_list = options.list;
+	//change the result set displayed page
+	SelectIt.prototype.change_page = function(page_num, initial_change){
 
-			//number of page rows in select
-			self.item_number = options.item_number;
+		var start = page_num * this.options.item_number - this.options.item_number;
+		var end = page_num * this.options.item_number;
+		this.displayed_list = [];
 
-			//filtered list by search term
-			self.filtered_list = self.init_list;
+		for(var i=start; i<end; i++){
+			if(this.filtered_list[i]!=undefined)
+				this.displayed_list.push(this.filtered_list[i]);
+		}
 
-			//total number of pages of the filtered list
-			self.page_number = Math.floor(self.filtered_list.length/self.item_number) + 1
+		this.drawSelect(this.displayed_list, initial_change);
+		
+	};
 
-			//current displayed page
-			self.current_page = 1;
+	//display selected result set page
+	SelectIt.prototype.drawSelect = function(opt, initial_load){
 
-			//form input search value
-			self.search_value = '';
+		var result_list = this.container.find('table').first().html('');
+		
+		for(var i in opt){
+			result_list.append('<tr><td><label data-selvalue="' + opt[i][this.options.select_label] +'"">' + opt[i][this.options.select_value] + '</label></td></tr>')
+		}
 
-			//list to be displayed (one page)
-			self.displayed_list = [];
+		if(this.options.full_paging){
 
-			//list selected value
-			self.chosen_value = {};
+			if(this.page_number > 1){
+				result_list.append('<tr><td><div class="selectIt_pagination">' + navigationFactory() + '</div></td></tr>');
+			}
 
+		}else{
 
-/***************************************************************** FUNCTIONS *******************************************************************/
+			var prev_button = '<tr><td class="resultListPrevPage">' + this.options.previous_label + '</td></tr>';
+			var next_button = '<tr><td class="resultListNextPage">' + this.options.next_label + '</td></tr>';
 
+			if(this.page_number > 1){
+				result_list.prepend(prev_button);
+				result_list.append(next_button);
+			}
+			
+		}
 
-			//getting css from any dom element
-			var getElementStyle = function(dom){
+		if(!initial_load)
+			result_list.show();
 
-		        var style;
-		        var returns = {};
-		        // FireFox and Chrome 
-		        if(window.getComputedStyle){
-		            style = window.getComputedStyle(dom, null);
-		            for(var i = 0, l = style.length; i < l; i++){
-		                var prop = style[i];
-		                var val = style.getPropertyValue(prop);
-		                returns[prop] = val;
-		            }
-		            return returns;
-		        }
-		        // IE and Opera
-		        if(dom.currentStyle){
-		            style = dom.currentStyle;
-		            for(var prop in style){
-		                returns[prop] = style[prop];
-		            }
-		            return returns;
-		        }
-		        // Style from style attribute
-		        if(style = dom.style){
-		            for(var prop in style){
-		                if(typeof style[prop] != 'function'){
-		                    returns[prop] = style[prop];
-		                }
-		            }
-		            return returns;
-		        }
-		        return returns;
-
-			};
+	};
 
 
-			//
-			var spawnNavigationNumber = function(id){
+	SelectIt.prototype.search = function(search_term){
 
-				var nav = '';
-				if(id==self.current_page){
-					nav += '<span class="selectIt_pagination_item active">' + id + '</span>';
-				}else{
-					nav += '<span class="selectIt_pagination_item inactive">' + id + '</span>';
-				}
+		var new_list = new Array();
 
-				return nav;
+    	if(search_term.length>1){
 
-			};
+        	for(var i in this.init_list){
+        		var item = this.init_list[i];
 
+        		if(item[this.options.select_value].toLowerCase().indexOf(search_term.toLowerCase())!== -1){
+        			
+        			new_list.push(item);
 
-			//navigation factory - ALPHA
-			var navigationFactory = function(){
+        		}
 
-				var pagination_navigation = ""
+        	}
 
+    		this.resetFilterList(new_list);
+    	}
+    	else{
+    		this.resetFilterList(this.init_list);
+    	}
 
-				if(self.page_number<4){
-
-					for(var i = 1; i <= 3; i++){
-						pagination_navigation += spawnNavigationNumber(i)
-					}
-					
-				}else{
-
-					var start = self.current_page - 2;
-
-					if(self.current_page==1){
-						start = self.current_page;
-					}
-
-					var end = Number(self.current_page) + 2;
-
-					for(var i = start; i <= end; i++){
-						pagination_navigation += spawnNavigationNumber(i)
-					}
-					
-					pagination_navigation += '<span style="float:left; cursor:default;">...</span>';
-					pagination_navigation += spawnNavigationNumber(self.page_number)
-
-				}
-
-				return pagination_navigation;
-
-			};
-
-			//switch to the next result set page
-			self.nextPage = function(){
-
-				if(self.current_page < self.page_number){
-					self.current_page++;
-					self.changePage(self.current_page);
-				}
-
-			};
-
-			//switch to the previous result set page
-			self.prevPage = function(){
-
-				if(self.current_page > 1){
-					self.current_page--;
-					self.changePage(self.current_page);
-				}
-
-			};
+	};
 
 
-			self.setPage = function(num){
-				self.current_page = num;
-				self.changePage(self.current_page);
-			};
+	//result set reset function
+	SelectIt.prototype.resetFilterList = function(new_filtered_list){
 
+		this.page_number = Math.floor(new_filtered_list.length/this.item_number) + 1;
+		this.filtered_list = new_filtered_list;
+		this.change_page(1, false);
 
-			//change the result set displayed page
-			self.changePage = function(page_num, initial_change){
-
-				var start = page_num * options.item_number - options.item_number;
-				var end = page_num * options.item_number;
-				self.displayed_list = [];
-
-				for(var i=start; i<end; i++){
-					if(self.filtered_list[i]!=undefined)
-						self.displayed_list.push(self.filtered_list[i]);
-				}
-
-				self.drawSelect(self.displayed_list, initial_change);
-				
-			};
-
-			//display selected result set page
-			self.drawSelect = function(opt, initial_load){
-
-				result_list.html('');
-				
-				for(var i in opt){
-					result_list.append('<tr><td><label data-selvalue="' + opt[i][options.select_label] +'"">' + opt[i][options.select_value] + '</label></td></tr>')
-				}
-
-				if(options.full_paging){
-
-					if(self.page_number > 1){
-						result_list.append('<tr><td><div class="selectIt_pagination">' + navigationFactory() + '</div></td></tr>');
-					}
-
-				}else{
-
-					var prev_button = '<tr><td class="resultListPrevPage">' + options.previous_label + '</td></tr>';
-					var next_button = '<tr><td class="resultListNextPage">' + options.next_label + '</td></tr>';
-
-					if(self.page_number > 1){
-						result_list.prepend(prev_button);
-						result_list.append(next_button);
-					}
-					
-				}
-
-
-				if(!initial_load)
-					result_list.show();
-
-			};
-
-
-			//result set reset function
-			self.resetFilterList = function(new_filtered_list){
-
-				self.page_number = Math.floor(new_filtered_list.length/self.item_number) + 1;
-				self.filtered_list = new_filtered_list;
-				self.changePage(1, false);
-
-			};
+	};
 
 
 /************************************************************** 'The DOM part' ****************************************************************/
 
 
-			//container for input field and result list
-			var container = $('<div>').addClass('selectIt_main_container');
+	SelectIt.prototype.set_up_html = function(elt){
 
-			var original_select = $(this);
+		var self = this;
 
-			//search input field is added data-selvalue attribute, added css from the DOM original select and transported into the container
-			var search_input = $('<input>').attr('data-selvalue', '').css(getElementStyle(this));
+		//container for input field and result list
+		this.container = $('<div>').addClass('selectIt_main_container');
 
-			//we hide the original select
-			original_select.hide();
+		var original_select = $(elt);
 
-			//result list is a simple table, with width of the search input field
-			var result_list = $('<table>').addClass('selectIt_result_list').css('width', search_input.width() + 2 + 'px').hide();
+		//search input field is added data-selvalue attribute, added css from the DOM original select and transported into the container
+		var search_input = $('<input>').attr('data-selvalue', '').css(this.get_html_element_style(elt));
 
-			//DOM position of the search input field
-			var search_input_document_placeholder = original_select.parent();
+		//we hide the original select
+		original_select.hide();
 
-			container.append(search_input).append(result_list);
+		//result list is a simple table, with width of the search input field
+		var result_list = $('<table>').addClass('selectIt_result_list').css('width', search_input.width() + 2 + 'px').hide();
 
-			//appending whole container back to the initial search input field DOM parent
-			search_input_document_placeholder.append(container);
+		//DOM position of the search input field
+		var search_input_document_placeholder = original_select.parent();
 
+		this.container.append(search_input).append(result_list);
 
-/******************************************************************* EVENTS *******************************************************************/
-
-
-			//search input field on change event - searching in the initial list
-			self.filterChange = function(){
-
-	        	var new_list = new Array();
-	        	var search_term = search_input.val();
-
-	        	if(search_term.length>1){
-
-		        	for(var i in self.init_list){
-		        		var item = self.init_list[i];
-
-		        		if(item[options.select_value].toLowerCase().indexOf(search_term.toLowerCase())!== -1){
-		        			
-		        			new_list.push(item);
-
-		        		}
-
-		        	}
-
-	        		self.resetFilterList(new_list);
-	        	}
-	        	else{
-	        		self.resetFilterList(self.init_list);
-	        	}
-
-			};
+		//appending whole container back to the initial search input field DOM parent
+		search_input_document_placeholder.append(this.container);
 
 
-			//show or hide result list event
-			search_input.click(function(){
-				result_list.toggle();
-			});
 
-			//
-			result_list.blur(function(){
-				result_list.hide();
-			});
+		//EVENTS
 
-			//previous and next button click events
-			container.on('click', 'td.resultListPrevPage', self.prevPage);
-			container.on('click', 'td.resultListNextPage', self.nextPage);
-
-			//select list item event
-			container.on('click', 'table.selectIt_result_list tr', function(){
-
-				var $self = $(this);
-				var label = $self.find('label');
-
-				if(label.size()>0){
-					self.chosen_value = { 
-						label : label.text(), 
-						value : label.data('selvalue') 
-					};
-
-					result_list.hide();
-
-					search_input.val(self.chosen_value.label);
-					search_input.data('selvalue', self.chosen_value.value);
-
-					original_select.html('');
-					original_select.append('<option value="' + self.chosen_value.value + '">' + self.chosen_value.label + '<option>')
-				}
-
-			})
-
-			container.on('click', 'span.inactive', function(){
-				self.setPage($(this).text());
-			});
-
-			search_input.keyup(self.filterChange);
-
-
-/******************************************************************* Initial page *******************************************************************/
-
-
-			//initial load of the first page
-			self.changePage(1, true);	
-
+		//show or hide result list event
+		search_input.click(function(){
+			result_list.toggle();
 		});
 
+		//
+		result_list.blur(function(){
+			result_list.hide();
+		});
+
+		//previous and next button click events
+		this.container.on('click', 'td.resultListPrevPage', function(){ self.prevPage() });
+		this.container.on('click', 'td.resultListNextPage', function(){ self.nextPage() });
+
+		//select list item event
+		this.container.on('click', 'table.selectIt_result_list tr', function(){
+
+			var $this = $(this);
+			var label = $this.find('label');
+
+			if(label.size()>0){
+				this.chosen_value = { 
+					label : label.text(), 
+					value : label.data('selvalue') 
+				};
+
+				result_list.hide();
+
+				search_input.val(this.chosen_value.label);
+				search_input.data('selvalue', this.chosen_value.value);
+
+				original_select.html('');
+				original_select.append('<option value="' + this.chosen_value.value + '">' + this.chosen_value.label + '<option>')
+			}
+
+		})
+
+		this.container.on('click', 'span.inactive', function(){
+			this.setPage($(this).text());
+		});
+
+		search_input.keyup(function(){
+	    	self.search($(this).val());
+		});		
+
 	};
+
+
+	//browser check
+    function browser_is_supported(){
+		var ref;
+	    if (window.navigator.appName === "Microsoft Internet Explorer") {
+	        return (null !== (ref = document.documentMode) && ref >= 8);
+	    }
+	    return true;
+    };
+
+
+	$.fn.extend({
+
+		selectit : function(options){
+
+			if(!browser_is_supported()){
+				return this;
+			}
+
+			return this.each(function(){
+				return new SelectIt(this, options);
+			});
+
+		}
+	});
 
 })(jQuery);
