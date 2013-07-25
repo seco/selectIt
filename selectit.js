@@ -89,7 +89,7 @@
 	}
 
 
-	SelectIt.prototype.spawnNavigationNumber = function(id){
+	SelectIt.prototype.spawn_navigation_number = function(id){
 
 		var nav = '';
 		if(id==this.current_page){
@@ -111,7 +111,7 @@
 		if(this.page_number<4){
 
 			for(var i = 1; i <= 3; i++){
-				pagination_navigation += spawnNavigationNumber(i)
+				pagination_navigation += spawn_navigation_number(i)
 			}
 			
 		}else{
@@ -125,11 +125,11 @@
 			var end = Number(this.current_page) + 2;
 
 			for(var i = start; i <= end; i++){
-				pagination_navigation += spawnNavigationNumber(i)
+				pagination_navigation += spawn_navigation_number(i)
 			}
 			
 			pagination_navigation += '<span style="float:left; cursor:default;">...</span>';
-			pagination_navigation += spawnNavigationNumber(this.page_number)
+			pagination_navigation += spawn_navigation_number(this.page_number)
 
 		}
 
@@ -138,7 +138,7 @@
 	};
 
 	//switch to the next result set page
-	SelectIt.prototype.nextPage = function(){
+	SelectIt.prototype.next_page = function(){
 
 		if(this.current_page < this.page_number){
 			this.current_page++;
@@ -148,7 +148,7 @@
 	};
 
 	//switch to the previous result set page
-	SelectIt.prototype.prevPage = function(){
+	SelectIt.prototype.prev_page = function(){
 
 		if(this.current_page > 1){
 			this.current_page--;
@@ -158,7 +158,7 @@
 	};
 
 
-	SelectIt.prototype.setPage = function(num){
+	SelectIt.prototype.set_page = function(num){
 		this.current_page = num;
 		this.change_page(this.current_page);
 	};
@@ -176,12 +176,12 @@
 				this.displayed_list.push(this.filtered_list[i]);
 		}
 
-		this.drawSelect(this.displayed_list, initial_change);
+		this.draw_select(this.displayed_list, initial_change);
 		
 	};
 
 	//display selected result set page
-	SelectIt.prototype.drawSelect = function(opt, initial_load){
+	SelectIt.prototype.draw_select = function(opt, initial_load){
 
 		var result_list = this.container.find('table').first().html('');
 		
@@ -197,8 +197,8 @@
 
 		}else{
 
-			var prev_button = '<tr><td class="resultListPrevPage">' + this.options.previous_label + '</td></tr>';
-			var next_button = '<tr><td class="resultListNextPage">' + this.options.next_label + '</td></tr>';
+			var prev_button = '<tr><td class="resultListprev_page">' + this.options.previous_label + '</td></tr>';
+			var next_button = '<tr><td class="resultListnext_page">' + this.options.next_label + '</td></tr>';
 
 			if(this.page_number > 1){
 				result_list.prepend(prev_button);
@@ -230,17 +230,17 @@
 
         	}
 
-    		this.resetFilterList(new_list);
+    		this.reset_filter_list(new_list);
     	}
     	else{
-    		this.resetFilterList(this.init_list);
+    		this.reset_filter_list(this.init_list);
     	}
 
 	};
 
 
 	//result set reset function
-	SelectIt.prototype.resetFilterList = function(new_filtered_list){
+	SelectIt.prototype.reset_filter_list = function(new_filtered_list){
 
 		this.page_number = Math.floor(new_filtered_list.length/this.item_number) + 1;
 		this.filtered_list = new_filtered_list;
@@ -293,8 +293,8 @@
 		});
 
 		//previous and next button click events
-		this.container.on('click', 'td.resultListPrevPage', function(){ self.prevPage() });
-		this.container.on('click', 'td.resultListNextPage', function(){ self.nextPage() });
+		this.container.on('click', 'td.resultListprev_page', function(){ self.prev_page() });
+		this.container.on('click', 'td.resultListnext_page', function(){ self.next_page() });
 
 		//select list item event
 		this.container.on('click', 'table.selectIt_result_list tr', function(){
@@ -320,7 +320,7 @@
 		})
 
 		this.container.on('click', 'span.inactive', function(){
-			this.setPage($(this).text());
+			this.set_page($(this).text());
 		});
 
 		search_input.keyup(function(){
