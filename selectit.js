@@ -52,7 +52,7 @@
 
 	}
 
-
+	//css style copy function
 	SelectIt.prototype.get_html_element_style = function(dom){
 
         var style;
@@ -88,7 +88,7 @@
 
 	}
 
-
+	//part of the paging factory - ALPHA
 	SelectIt.prototype.spawn_navigation_number = function(id){
 
 		var nav = '';
@@ -157,7 +157,7 @@
 
 	};
 
-
+	//set page to a desired number
 	SelectIt.prototype.set_page = function(num){
 		this.current_page = num;
 		this.change_page(this.current_page);
@@ -179,6 +179,7 @@
 		this.draw_select(this.displayed_list, initial_change);
 		
 	};
+
 
 	//display selected result set page
 	SelectIt.prototype.draw_select = function(opt, initial_load){
@@ -212,7 +213,7 @@
 
 	};
 
-
+	//search function - to be extended with proper regex search
 	SelectIt.prototype.search = function(search_term){
 
 		var new_list = new Array();
@@ -248,10 +249,7 @@
 
 	};
 
-
-/************************************************************** 'The DOM part' ****************************************************************/
-
-
+	//plugin html - result list html element 'table' to be replaced by html element 'list'
 	SelectIt.prototype.set_up_html = function(elt){
 
 		var self = this;
@@ -281,7 +279,8 @@
 
 
 		//EVENTS
-
+		//more events to be added, specially for opening/closing of the select
+		
 		//show or hide result list event
 		search_input.click(function(){
 			result_list.toggle();
