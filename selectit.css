@@ -18,7 +18,7 @@
 	text-indent: 2px;
 }
 
-ul.drop,ul.drop li,ul.drop ul {
+ul.drop,ul.drop li{
 	list-style: none;
 	margin: 0;
 	padding: 0;
@@ -33,15 +33,32 @@ ul.drop li:nth-child(odd) {
 	background: #FFF;
 }
 
-ul.drop li:first-child, ul.drop li:last-child{
-	margin: 0;
-	padding: 0;
+ul.drop {
+	position: relative;
+	z-index: 597;
+	float: left;
+	margin: 1px 0 0 0;
+}
+
+ul.drop li {
+	float: left;
+	line-height: 1.3em;
+	vertical-align: middle;
+	clear: both;
+	width: 100%;
+}
+
+.selectIt_item{
+	text-indent: 4px;
+}
+
+.selectIt_item:hover{
+	background: #c2edfd;
 }
 
 .selectIt_result_list_button{
 	text-shadow: 0;
 	border-bottom: 1px solid #222;
-	cursor: pointer;
 	color: #fff;
 	text-decoration: none;
 	font-weight: bold;
@@ -49,36 +66,27 @@ ul.drop li:first-child, ul.drop li:last-child{
 	font-style: italic;
 	text-align: center;
 	width: 100%;
-	padding: 4px;
 }
 
-.selectIt_result_list_button :hover{
-	background-color: #6b6b6b;
+.selectIt_result_list_button:hover{
+	background-color: #6d6d6d;
 	text-shadow: 0 -1px 1px #222;
 }
 
-ul.drop {
-	position: relative;
-	z-index: 597;
-	float: left;
+.selectIt_item, .selectIt_result_list_button{
+	padding: 4px 0;
+	cursor: pointer;
+};
+
+.navigation{
+	float:left; 
+	cursor:default;
 }
 
-ul.drop li {
-	float: left;
-	line-height: 1.3em;
-	vertical-align: middle;
-	padding: 4px;
-	clear: both;
-	width: 100%;
+.active{
+	color: grey;
 }
 
-ul.drop li.hover,ul.drop li:hover {
-	position: relative;
-	z-index: 599;
-	background: #c2edfd;
-	cursor: pointer;	
-}
-
-ul.drop li:hover>ul {
-	visibility: visible
+.inactive{
+	color: blue;
 }
