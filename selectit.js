@@ -93,9 +93,9 @@
 
 		var nav = '';
 		if(id==this.current_page){
-			nav += '<span class="selectIt_pagination_item active">' + id + '</span>';
+			nav += '<div class="selectIt_pagination_item active">' + id + '</div>';
 		}else{
-			nav += '<span class="selectIt_pagination_item inactive">' + id + '</span>';
+			nav += '<div class="selectIt_pagination_item inactive">' + id + '</div>';
 		}
 
 		return nav;
@@ -128,7 +128,7 @@
 				pagination_navigation += spawn_navigation_number(i)
 			}
 			
-			pagination_navigation += '<span style="float:left; cursor:default;">...</span>';
+			pagination_navigation += '<div style="float:left; cursor:default;">...</div>';
 			pagination_navigation += spawn_navigation_number(this.page_number)
 
 		}
@@ -184,26 +184,29 @@
 	//display selected result set page
 	SelectIt.prototype.draw_select = function(opt, initial_load){
 
-		var result_list = this.container.find('table').first().html('');
+		var result_list = this.container.find('ul').first().html('');
 		
 		for(var i in opt){
-			result_list.append('<tr><td><label data-selvalue="' + opt[i][this.options.select_label] +'"">' + opt[i][this.options.select_value] + '</label></td></tr>')
+			result_list.append('<li><label data-selvalue="' + opt[i][this.options.select_label] +'"">' + opt[i][this.options.select_value] + '</label></li>')
 		}
 
 		if(this.options.full_paging){
 
 			if(this.page_number > 1){
-				result_list.append('<tr><td><div class="selectIt_pagination">' + navigationFactory() + '</div></td></tr>');
+				result_list.append('<li><div class="selectIt_pagination">' + navigationFactory() + '</div></li>');
 			}
 
 		}else{
 
-			var prev_button = '<tr><td class="resultListprev_page">' + this.options.previous_label + '</td></tr>';
-			var next_button = '<tr><td class="resultListnext_page">' + this.options.next_label + '</td></tr>';
+			var prev_button = '<li><div id="selectIt_prev_page" class="selectIt_result_list_button">' + this.options.previous_label + '</div></li>';
+			var next_button = '<li><div id="selectIt_next_page" class="selectIt_result_list_button">' + this.options.next_label + '</div></li>';
 
 			if(this.page_number > 1){
 				result_list.prepend(prev_button);
 				result_list.append(next_button);
+			}else{
+				result_list.children().first().css('padding','4px');
+				result_list.children().last().css('padding','4px');
 			}
 			
 		}
@@ -253,20 +256,26 @@
 	SelectIt.prototype.set_up_html = function(elt){
 
 		var self = this;
-
-		//container for input field and result list
-		this.container = $('<div>').addClass('selectIt_main_container');
-
 		var original_select = $(elt);
 
+		//container for input field and result list
+		this.container = $('<div>').addClass('selectIt_main_container').width(original_select.width());
+
 		//search input field is added data-selvalue attribute, added css from the DOM original select and transported into the container
-		var search_input = $('<input>').attr('data-selvalue', '').css(this.get_html_element_style(elt));
+		var input_attributes = {
+			'data-selvalue' : '',
+			'class' : 'selectIt_search_field'
+		};
+
+		var search_input = $('<input>', input_attributes).width(original_select.width());//.css(this.get_html_element_style(elt));
 
 		//we hide the original select
 		original_select.hide();
 
 		//result list is a simple table, with width of the search input field
-		var result_list = $('<table>').addClass('selectIt_result_list').css('width', search_input.width() + 2 + 'px').hide();
+		//var result_list = $('<table>').addClass('selectIt_result_list').css('width', search_input.width() + 2 + 'px').hide();
+
+		var result_list = $('<ul>').addClass('drop').css('width', original_select.width() + 'px').hide();
 
 		//DOM position of the search input field
 		var search_input_document_placeholder = original_select.parent();
@@ -292,11 +301,11 @@
 		});
 
 		//previous and next button click events
-		this.container.on('click', 'td.resultListprev_page', function(){ self.prev_page() });
-		this.container.on('click', 'td.resultListnext_page', function(){ self.next_page() });
+		this.container.on('click', '#selectIt_prev_page', function(){ self.prev_page() });
+		this.container.on('click', '#selectIt_next_page', function(){ self.next_page() });
 
 		//select list item event
-		this.container.on('click', 'table.selectIt_result_list tr', function(){
+		this.container.on('click', 'ul.drop li', function(){
 
 			var $this = $(this);
 			var label = $this.find('label');
@@ -318,7 +327,7 @@
 
 		})
 
-		this.container.on('click', 'span.inactive', function(){
+		this.container.on('click', 'div.inactive', function(){
 			this.set_page($(this).text());
 		});
 
