@@ -8,6 +8,7 @@
 .selectIt_main_container{
 	font-family: Arial;
 	font-size: 12px;
+	position: relative;
 }
 
 .selectIt_search_field{

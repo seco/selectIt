@@ -205,7 +205,7 @@
 
 		//result list is positioned absolute, so we have to get the container offset, to display it right under it
 		var offset_top = $(this.container).offset().top + this.container.height();
-		var offset_left = $(this.search_input).offset().left;
+		var offset_left = $(this.container).offset().left;
 
 		this.result_list.css({ top : offset_top, left : offset_left });
 
