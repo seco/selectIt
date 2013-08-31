@@ -1,3 +1,12 @@
+/**
+ * SelectIt jQuery plugin
+ * https://github.com/lsiric/selectIt
+ *
+ * Copyright 2013 Luka Siric <siric.luka@gmail.com>
+ * License: MIT (http://www.opensource.org/licenses/mit-license.php)
+*/
+
+
 (function($){
 
 	var SelectIt = function(html_element, options_external){
@@ -204,10 +213,10 @@
 		self.original_select.hide();
 
 		//result list is positioned absolute, so we have to get the container offset, to display it right under it
-		var offset_top = $(this.container).offset().top + this.container.height();
-		var offset_left = $(this.container).offset().left;
+		var offset_top = /*$(this.container).offset().top + */ this.container.height();
+		//var offset_left = $(this.search_input).offset().left;
 
-		this.result_list.css({ top : offset_top, left : offset_left });
+		this.result_list.css({ top : offset_top });
 
 	};
 

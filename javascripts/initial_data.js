@@ -1,3 +1,7 @@
+/*
+ * INITIAL DATA - List with 500 items
+*/
+
 var initial_list = [
     {
         id: 0,
