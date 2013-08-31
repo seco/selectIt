@@ -212,9 +212,8 @@
 		//we hide the original select
 		self.original_select.hide();
 
-		//result list is positioned absolute, so we have to get the container offset, to display it right under it
-		var offset_top = /*$(this.container).offset().top + */ this.container.height();
-		//var offset_left = $(this.search_input).offset().left;
+		//result list is positioned absolute, so we have to get the container height, to display result list right under it
+		var offset_top = this.container.height();
 
 		this.result_list.css({ top : offset_top });
 
