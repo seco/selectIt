@@ -1,0 +1,95 @@
+.selectIt{
+	width:600px;
+	margin: 0;
+	padding: 0;
+	cursor: pointer;
+}
+
+.selectIt_main_container{
+	font-family: Arial;
+	font-size: 12px;
+}
+
+.selectIt_search_field{
+	width:100px; 
+	height: 20px; 
+	cursor: pointer; 
+	padding: 2px;
+	text-indent: 2px;
+}
+
+ul.drop,ul.drop li{
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	color: black;
+}
+
+ul.drop li:nth-child(even) {
+	background: #CCC;
+}
+
+ul.drop li:nth-child(odd) {
+	background: #FFF;
+}
+
+ul.drop {
+	position: relative;
+	z-index: 597;
+	float: left;
+	margin: 0;
+	position: absolute;
+	top: 0;
+	left: 0;	
+}
+
+ul.drop li {
+	float: left;
+	line-height: 1.3em;
+	vertical-align: middle;
+	clear: both;
+	width: 100%;
+}
+
+.selectIt_item{
+	text-indent: 4px;
+}
+
+.selectIt_item:hover{
+	background: #c2edfd;
+}
+
+.selectIt_result_list_button{
+	text-shadow: 0;
+	border-bottom: 1px solid #222;
+	color: #fff;
+	text-decoration: none;
+	font-weight: bold;
+	background-color: #494949;
+	font-style: italic;
+	text-align: center;
+	width: 100%;
+}
+
+.selectIt_result_list_button:hover{
+	background-color: #6d6d6d;
+	text-shadow: 0 -1px 1px #222;
+}
+
+.inactive{
+	color: #a7a7a7;
+}
+
+.selectIt_item, .selectIt_result_list_button{
+	padding: 4px 0;
+	cursor: pointer;
+};
+
+.navigation{
+	float:left; 
+	cursor:default;
+}
+
+.active{
+	color: grey;
+}
